@@ -15,25 +15,52 @@
 #include "House.hpp"
 #include "World.hpp"
 #include "Camera.hpp"
-#include "mesh.hpp"
+#include "Clouds.hpp"
+#include "pixmap/RGBpixmap.h"
+#include "time.h"
+#include "SunMoon.hpp"
+
+#define TIME 0.0015;
+
+RGBpixmap pix[6];   // make six pixmaps
+
 
 GLint winWidth = 800, winHeight = 800;
 
-GLfloat red = 1.0, green = 1.0, blue = 1.0;  //color
+GLfloat red = 1.0, green = 1.0, blue = 1.0,theta;
 GLint moving = 0, xBegin = 0, coordinate = 1, type = 4, selected = 1;
+GLfloat globalTime = 13;
+GLfloat r = 0.19, g = 0.6, b = 0.8;
+int colorCount;
+//6078
 
 //Declare a world containing all objects to draw.
 World myWorld;
 Camera myCamera;
+SunMoon planets;
 
-void display(void) {
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glColor3f(red, green, blue);
+void init(void) {
+	glClearColor(0.0, 0.0, 0.0, 1.0);  // Sets display colour to black
 	myCamera.setProjectionMatrix();
-	myWorld.draw_world(); // draw all objects in the world
-	glFlush();
-	glutSwapBuffers();
+
+	pix[0].readBMPFile("wood.bmp");
+	pix[0].setTexture(0);
+
+	pix[1].readBMPFile("mountain.bmp");  // make pixmap from image
+	pix[1].setTexture(1);
+
+	pix[2].readBMPFile("sun.bmp");
+	pix[2].setTexture(2);
+	pix[3].readBMPFile("moon.bmp");
+	pix[3].setTexture(3);
+
+	planets.Sun->textureID = 2;
+	planets.Moon->textureID = 3;
+
+
+	myWorld.list[6] = &planets;
 }
+
 
 void winReshapeFcn(GLint newWidth, GLint newHeight) {
 	glViewport(0, 0, newWidth, newHeight);
@@ -54,49 +81,12 @@ void mouseAction(int button, int state, int x, int y) {
 }
 
 void mouseMotion(GLint x, GLint y) {
-	GLfloat rx, ry, rz, theta;
-	int i = selected - 1;
+	GLfloat theta;
 
 	if (moving) {
 		theta = (xBegin - x > 0) ? 1 : -1;
 
-		if (coordinate == 1) {
-			if (type == 1) {
-				rx = myWorld.list[i]->getMC().mat[0][0];
-				ry = myWorld.list[i]->getMC().mat[1][0];
-				rz = myWorld.list[i]->getMC().mat[2][0];
-				myWorld.list[i]->rotate(rx, ry, rz, theta * 0.5);
-			} else if (type == 2) {
-				rx = myWorld.list[i]->getMC().mat[0][1];
-				ry = myWorld.list[i]->getMC().mat[1][1];
-				rz = myWorld.list[i]->getMC().mat[2][1];
-				myWorld.list[i]->rotate(rx, ry, rz, theta * 0.5);
-			} else if (type == 3) {
-				rx = myWorld.list[i]->getMC().mat[0][2];
-				ry = myWorld.list[i]->getMC().mat[1][2];
-				rz = myWorld.list[i]->getMC().mat[2][2];
-				myWorld.list[i]->rotate(rx, ry, rz, theta * 0.5);
-			} else if (type == 4) {
-				myWorld.list[i]->scale_change(theta * 0.02);
-			}
-		} else if (coordinate == 2) {
-			if (type == 1) {
-				rx = 1, ry = 0, rz = 0;
-				myWorld.list[i]->rotate_origin(rx, ry, rz, theta * 0.5);
-			} else if (type == 2) {
-				rx = 0, ry = 1, rz = 0;
-				myWorld.list[i]->rotate_origin(rx, ry, rz, theta * 0.5);
-			} else if (type == 3) {
-				rx = 0, ry = 0, rz = 1;
-				myWorld.list[i]->rotate_origin(rx, ry, rz, theta * 0.5);
-			} else if (type == 4) {
-				myWorld.list[i]->translate(theta * 0.02, 0, 0);
-			} else if (type == 5) {
-				myWorld.list[i]->translate(0, theta * 0.02, 0);
-			} else if (type == 6) {
-				myWorld.list[i]->translate(0, 0, theta * 0.02);
-			}
-		} else if (coordinate == 3) {
+		if (coordinate == 3) {
 			if (type == 1) {
 				myCamera.rotate(1.0, 0.0, 0.0, theta * 0.5);
 			} else if (type == 2) {
@@ -125,22 +115,95 @@ void mouseMotion(GLint x, GLint y) {
 
 }
 
-void init(void) {
-	glClearColor(0.0, 0.0, 0.0, 1.0);  // Sets display colour to black
+
+void backgroundColor() { // need to fix sun and moon times
+	if (globalTime > 4.0 && globalTime < 7.0) {
+		planets.Moon->translate(0, -0.001, 0);
+	}
+	if (globalTime > 8.0 && globalTime < 11.0) {
+		planets.Sun->translate(0, 0.001, 0);
+	}
+	if (globalTime > 13.0 && globalTime < 19.0) {
+		colorCount += 1;
+		planets.Sun->translate(0, -0.0005, 0);
+
+		if (colorCount == 50){
+			r += 0.005;
+			g += 0.005;
+			b += 0.005;
+			if(r > 0.19){
+				r = 0.19;
+			}
+			if (g > 0.6){
+				g = 0.6;
+			}
+			if (b > 0.8){
+				b = 0.8;
+			}
+			colorCount = 0;
+		}
+	} else if (globalTime > 18.0 && globalTime < 24.0) {
+		colorCount += 1;
+		planets.Moon->translate(0, 0.0005, 0);
+		if (colorCount == 50){
+			r -= 0.005;
+			g -= 0.005;
+			b -= 0.005;
+			if(r <= 0){
+					r = 0;
+			}
+			if (g <= 0){
+				g = 0;
+			}
+			if (b <= 0){
+				b = 0;
+			}
+			colorCount = 0;
+		}
+	} else{
+		if (colorCount != 0){
+			colorCount = 0;
+		}
+	}
+}
+
+void time(void){
+	static int oldTime, newTime;
+	GLfloat speed = 0.0005;
+	oldTime = clock();
+	theta = (newTime - oldTime) * speed;
+	globalTime += TIME;
+	if(globalTime > 24){
+		globalTime = 0;
+	}
+	newTime = clock();
+	oldTime = newTime;
+	printf("global: %f\n", globalTime);
+	glutPostRedisplay();
+}
+
+
+void display(void) {
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	glColor3f(red, green, blue);
 	myCamera.setProjectionMatrix();
-
-//	Mesh mymesh;
-//	mymesh.readMesh("barn.txt");
-//	mymesh.printMesh();
-
+	myWorld.draw_world(); // draw all objects in the world
+	planets.draw();
+	backgroundColor();
+	glClearColor(r, g, b, 0.0f); // sky blue
+	printf("%f %f %f\n", r,g,b);
+	glFlush();
+	glutSwapBuffers();
 }
 
 void mainMenu(GLint option) {
 	switch (option) {
 	case 1:
-		myWorld.list[0] = new Pyramid();
+		myWorld.list[0] = new Base();
 		myWorld.list[1] = new House();
 		myWorld.list[2] = new Mountains();
+		myWorld.list[3] = new Clouds();
 		myCamera.setDefaultCamera();
 		red = 1.0;
 		green = 1.0;
@@ -177,50 +240,20 @@ void colorSubMenu(GLint colorOption) {
 	glutPostRedisplay();
 }
 
-void MCTransMenu(GLint transOption) {
-	coordinate = 1;
-	type = transOption;
-	glutPostRedisplay();
-}
-
-void WCTransMenu(GLint transOption) {
-	coordinate = 2;
-	type = transOption;
-	glutPostRedisplay();
-}
-
 void VCTransMenu(GLint transOption) {
 	coordinate = 3;
 	type = transOption;
 	glutPostRedisplay();
 }
 
-void ObjSubMenu(GLint objectOption) {
-	selected = objectOption;
-	glutPostRedisplay();
-}
-
 void menu() {
-	GLint WCTrans_Menu, VCTrans_Menu, MCTrans_Menu, subMenuColor, Object_Menu;
+	GLint VCTrans_Menu, subMenuColor;
 	subMenuColor = glutCreateMenu(colorSubMenu);
 	glutAddMenuEntry(" Red", 1);
 	glutAddMenuEntry(" Green", 2);
 	glutAddMenuEntry(" Blue", 3);
 	glutAddMenuEntry(" White", 4);
 
-	MCTrans_Menu = glutCreateMenu(MCTransMenu);
-	glutAddMenuEntry(" Rotate X ", 1);
-	glutAddMenuEntry(" Rotate Y ", 2);
-	glutAddMenuEntry(" Rotate Z ", 3);
-	glutAddMenuEntry(" Scale ", 4);
-
-	WCTrans_Menu = glutCreateMenu(WCTransMenu);
-	glutAddMenuEntry(" Rotate X ", 1);
-	glutAddMenuEntry(" Rotate Y ", 2);
-	glutAddMenuEntry(" Rotate Z ", 3);
-	glutAddMenuEntry(" Translate X ", 4);
-	glutAddMenuEntry(" Translate Y ", 5);
-	glutAddMenuEntry(" Translate Z ", 6);
 
 	VCTrans_Menu = glutCreateMenu(VCTransMenu);
 	glutAddMenuEntry(" Rotate X ", 1);
@@ -229,22 +262,12 @@ void menu() {
 	glutAddMenuEntry(" Translate X ", 4);
 	glutAddMenuEntry(" Translate Y ", 5);
 	glutAddMenuEntry(" Translate Z ", 6);
-	glutAddMenuEntry(" Clipping Near ", 7);
-	glutAddMenuEntry(" Clipping Far ", 8);
-	glutAddMenuEntry(" Angle ", 9);
-
-	Object_Menu = glutCreateMenu(ObjSubMenu);
-	glutAddMenuEntry(" Cube ", 1);
-	glutAddMenuEntry(" Pyramid ", 2);
-	glutAddMenuEntry(" House ", 3);
+	glutAddMenuEntry(" Zoom ", 9);
 
 	glutCreateMenu(mainMenu);      // Create main pop-up menu.
 	glutAddMenuEntry(" Reset ", 1);
 	glutAddSubMenu(" Colors ", subMenuColor);
-	glutAddSubMenu(" Model Transformations ", MCTrans_Menu);
-	glutAddSubMenu(" WC Transformations ", WCTrans_Menu);
 	glutAddSubMenu(" View Transformations ", VCTrans_Menu);
-	glutAddSubMenu(" Object Selection ", Object_Menu);
 	glutAddMenuEntry(" Quit", 2);
 }
 
@@ -253,10 +276,11 @@ int main(int argc, char** argv) {
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
 	glutInitWindowPosition(100, 100);
 	glutInitWindowSize(winWidth, winHeight);
-	glutCreateWindow("A2 (Calvin)");
+	glutCreateWindow("Mountain Skyline (by Calvin and Ethyl)");
 	init();
 	menu();
 
+	glutIdleFunc(time);
 	glutDisplayFunc(display);
 	glutMotionFunc(mouseMotion);
 	glutMouseFunc(mouseAction);

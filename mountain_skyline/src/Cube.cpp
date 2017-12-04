@@ -18,16 +18,37 @@ Cube::Cube()
     face[4][0] = 5;face[4][1] = 7;face[4][2] = 3;face[4][3] = 1;
     face[5][0] = 6;face[5][1] = 4;face[5][2] = 0;face[5][3] = 2;
 
+	faceColor[0][0] = 1.0, faceColor[0][1] = 0.0; faceColor[0][2] = 0.0;
+	faceColor[1][0] = 0.0, faceColor[1][1] = 1.0; faceColor[1][2] = 0.0;
+	faceColor[2][0] = 0.0, faceColor[2][1] = 0.0; faceColor[2][2] = 1.0;
+	faceColor[3][0] = 1.0, faceColor[3][1] = 1.0; faceColor[3][2] = 0.0;
+	faceColor[4][0] = 1.0, faceColor[4][1] = 0.0; faceColor[4][2] = 1.0;
+	faceColor[5][0] = 0.0, faceColor[5][1] = 1.0; faceColor[5][2] = 1.0;
+
+	cube_face_norm_mc[0][0] = 0.0,cube_face_norm_mc[0][1] = 0.0,cube_face_norm_mc[0][2] = -1.0,
+	cube_face_norm_mc[1][0] = 1.0, cube_face_norm_mc[1][1] = 0.0, cube_face_norm_mc[1][2] = 0.0;
+	cube_face_norm_mc[2][0] = 0.0, cube_face_norm_mc[2][1] = 0.0, cube_face_norm_mc[2][2] = 1.0;
+	cube_face_norm_mc[3][0] = -1.0, cube_face_norm_mc[3][1] = 0.0, cube_face_norm_mc[3][2] = 0.0;
+	cube_face_norm_mc[4][0] = 0.0, cube_face_norm_mc[4][1] = 1.0, cube_face_norm_mc[4][2] = 0.0;
+	cube_face_norm_mc[5][0] = 0.0, cube_face_norm_mc[5][1] = -1.0, cube_face_norm_mc[5][2] = 0.0;
+
 }
 
 void Cube::draw_face(int i)
 {
-    glBegin(GL_LINE_LOOP);
-		glVertex3fv(&vertex[face[i][0]][0]);
-		glVertex3fv(&vertex[face[i][1]][0]);
-		glVertex3fv(&vertex[face[i][2]][0]);
-		glVertex3fv(&vertex[face[i][3]][0]);
-    glEnd();
+	glBindTexture(GL_TEXTURE_2D, textureID[i]);
+	glBegin(GL_QUADS);
+	glTexCoord2f(0.0, 0.0); glVertex3fv(&vertex[face[i][0]][0]);
+	glTexCoord2f(1.0, 0.0); glVertex3fv(&vertex[face[i][1]][0]);
+	glTexCoord2f(0.0, 1.0); glVertex3fv(&vertex[face[i][2]][0]);
+	glTexCoord2f(1.0, 1.0); glVertex3fv(&vertex[face[i][3]][0]);
+	glEnd();
+//    glBegin(GL_LINE_LOOP);
+//		glVertex3fv(&vertex[face[i][0]][0]);
+//		glVertex3fv(&vertex[face[i][1]][0]);
+//		glVertex3fv(&vertex[face[i][2]][0]);
+//		glVertex3fv(&vertex[face[i][3]][0]);
+//    glEnd();
 
 }
 
@@ -40,4 +61,9 @@ void Cube::draw()
         draw_face(i);
     }
     glPopMatrix();
+}
+
+
+void Cube::setTextureID(int index, int textureid) {
+	textureID[index] = textureid;
 }

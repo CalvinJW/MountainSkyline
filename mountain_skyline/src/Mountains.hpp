@@ -10,8 +10,14 @@
 
 #include <GL/glut.h>
 #include "Shape.hpp"
+#include "Pyramid.hpp"
 
 class Mountains: public Shape {
+protected:
+	Pyramid* mountain1;
+	Pyramid* mountain2;
+	Pyramid* mountain3;
+
 public:
 	Mountains();
 	void draw();

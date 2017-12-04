@@ -1,18 +1,21 @@
 #ifndef CWORLD_HPP
 #define CWORLD_HPP
 
-#include "Pyramid.hpp"
+#include "Base.hpp"
 #include"House.hpp"
-#include "Mesh.hpp"
+#include "Clouds.hpp"
 #include <iostream>
 #include <list>
 #include <vector>
 #include "Mountains.hpp"
+#include "Cone.hpp"
+#include "Cylinder.hpp"
+#include "SunMoon.hpp"
 
 
 class World {
 public:
-	Shape* list[3];
+	Shape* list[7];
 	// std::list<Shape*> ObjectList;
 	// std::vector<Shape*>* ObjectVector;
 

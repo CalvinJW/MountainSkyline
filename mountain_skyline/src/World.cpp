@@ -4,9 +4,12 @@
 
 #include "World.hpp"
 World::World() {
-	list[0] = new Pyramid();
+	list[0] = new Base();
 	list[1] = new House();
 	list[2] = new Mountains();
+	list[3] = new Clouds();
+	list[4] = new Cylinder();
+	list[5] = new Cone();
 
 	//Mesh* mymesh = new Mesh();
 	//mymesh->readMesh("barn.3VN");
@@ -30,12 +33,18 @@ World::~World(){
     delete list[0];
 	delete list[1];
 	delete list[2];
+	delete list[3];
+	delete list[4];
+	delete list[5];
 }
 
 void World::draw_world() {
 	list[0]->draw();
 	list[1]->draw();
 	list[2]->draw();
+	list[3]->draw();
+	list[4]->draw();
+	list[5]->draw();
 	/*
 	for (std::list<Shape*>::const_iterator it = ObjectList.begin(); it!=ObjectList.end(); ++it) {
 		(*it)->draw();

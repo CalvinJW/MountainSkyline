@@ -5,11 +5,13 @@
 #include "Shape.hpp"
 #include "Pyramid.hpp"
 #include "Cube.hpp"
+#include "pixmap/RGBpixmap.h"
 
 class House: public Shape {
 protected:
 	Cube* body;
 	Pyramid* roof;
+	RGBpixmap pix[2];   // make six pixmaps
 
 public:
 	House();
